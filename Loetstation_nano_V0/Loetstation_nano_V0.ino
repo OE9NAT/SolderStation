@@ -20,6 +20,7 @@ int temp_measure(); //funktion to measure the temp
 int temp_max = 400; // max einstellbare Temperatur in grad Celcius
 int temp_min = 60;  // min einstellbare Temperatur in grad Celcius & stand by temp
 
+
 // inputs rotary encoder and buttens
  Rotary r = Rotary(3, 2);  // rotary encoder on hardware interup pin D2 und D3
 
@@ -62,7 +63,7 @@ void setup() {
     lcd.setCursor(1,0); //position 1, line 0
     lcd.print("Solder station");
     lcd.setCursor(0,1);
-    lcd.print("Start v0.1");
+    lcd.print("Start v0.2");
    
    //rotory interrupt setup  
    PCICR |= (1 << PCIE2);  
@@ -81,16 +82,17 @@ void setup() {
      pinMode(pwm_heater_pin, OUTPUT);
      
   
-     // Configure Timer 2 for Phase-Correct PWM
+     // Configure Timer 1 for Phase-Correct PWM
      TCCR1A = _BV(COM1A1) | _BV(WGM10);  // Fast PWM mode, Clear OC1A on compare match
      TCCR1B = _BV(CS12) | _BV(CS10);     // Prescaler = 1024
      TCNT1 = 0;  // Reset the Timer1 count value to 0
-     OCR1A = 0;  // Set PWM duty cycle (0 to 255)
+     OCR1A = 0;  // Set PWM duty cycle (0 to 255) with 16bit 0 to 65535.
 
   Serial.println("Start of program");
   delay(100);            // waits for a second
 
-  Serial.println("Temp SOLL, Temp IST");
+  Serial.println("Temp_SOLL, Temp_IST");
+  temp_min = 1; //TESTTING
 
 }
 
@@ -110,8 +112,7 @@ void loop() {
   
  
 
-  //check if pen is in the station ... stand by
-  stand_by = !digitalRead(stand_by_pin);
+  
   
 
   if (!POWERon) { // power off
@@ -128,6 +129,7 @@ void loop() {
     OCR1A = map(pwm_heater_duty, 0, 65535, 0,255);  // Map Temp to counter value
     lcd.setCursor(0,1);
     lcd.print("ON ");
+    lcd.print("OCR1A ");
   }
 //interrupts();
   
@@ -147,7 +149,6 @@ void loop() {
       //if (!POWERon) { POWERon = true; Serial.println("POWERon = true");} else {POWERon = false; };
       button_rott_state = button_rott_state;
     }
-     
   }
   button_rott_last = button_rott_state;
     
@@ -155,43 +156,16 @@ void loop() {
 //status and debugging
   if (POWERon) { digitalWrite(led_status, HIGH); } else { digitalWrite(led_status, LOW); }
   
-
-  digitalWrite(led_rot, HIGH); //LOW or HIGH
-  delay(100);            // waits for a second
-  digitalWrite(led_rot, LOW); //LOW or HIGH
- 
-
-  digitalWrite(led_gelb, HIGH); //LOW or HIGH
-  delay(100);            // waits for a second
-  digitalWrite(led_gelb, LOW); //LOW or HIGH
+  digitalWrite(led_rot, HIGH); delay(100);   digitalWrite(led_rot, LOW);
+  digitalWrite(led_gelb, HIGH);  delay(100); digitalWrite(led_gelb, LOW); 
+  digitalWrite(led_gruen, HIGH);  delay(100);  digitalWrite(led_gruen, LOW);
   
 
-  digitalWrite(led_gruen, HIGH); //LOW or HIGH
-  delay(100);            // waits for a second
-  digitalWrite(led_gruen, LOW); //LOW or HIGH
-  
-
-  Serial.println("  \n ");
-  //Serial.print(String("#  Temp ist: ") + temp_IST);
-  // Serial.print(String("#  Temp Soll: ") + temp_SOLL );
-  //Serial.print("#  Temp diff: ");
-  //Serial.print(temp_IST - temp_SOLL);
-  // Serial.println("  End loop program ");
-  
-
-   Serial.print(temp_IST);
-   Serial.print(",");
-   Serial.println(temp_SOLL);
-   //Serial.println(temp_SOLL);
-
-   lcd.setCursor(12,0);
-   lcd.print(temp_SOLL);
-   lcd.print(" "); // to overwrite the old values
+   Serial.print(temp_IST);  Serial.print(",");  Serial.println(temp_SOLL);
 
 
-   lcd.setCursor(12,1);   
-   lcd.print(temp_IST);
-   lcd.print("   ");
+   lcd.setCursor(12,0);   lcd.print(temp_SOLL);  lcd.print(" "); // to overwrite the old values
+   lcd.setCursor(12,1);   lcd.print(temp_IST);  lcd.print("   ");
 
    
    
